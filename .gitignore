@@ -1,1 +1,3 @@
 build
+*.ipynb
+.ipynb_checkpoints
