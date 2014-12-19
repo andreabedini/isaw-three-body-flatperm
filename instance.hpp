@@ -11,7 +11,6 @@
 #include "flatperm.hpp"
 #include "hexagonal.hpp"
 #include "my_array.hpp"
-#include "nearest_neighbour.hpp"
 #include "radius.hpp"
 #include "three_body.hpp"
 #include "walk.hpp"
@@ -49,7 +48,6 @@ struct instance
   uint64_t samples;
   features::radius<point> radius;
   features::three_body<lattice> three_body;
-  features::nearest_neighbour nearest_neighbour;
   my_array<long double, num_flatperm_indices> Re2W, Rg2W, Rm2W;
 
   my_array<long double, num_flatperm_indices - 1> sampled_weights;
@@ -63,7 +61,7 @@ struct instance
     // initialise flatperm and pass the indices limits
     // of course to accommodate both length 0 and length N, the index must be
     // able to take N+1 possible values
-    , flatperm({N+1, N+1, N+2}, mu, rng)
+    , flatperm({N+1, N+2, N+2}, mu, rng)
     , walk(N)
     , samples(0)
     // initialise out histogram with the dimensions as the flatperm histograms
@@ -159,11 +157,10 @@ struct instance
     walk.register_step(x);
     radius.register_step(walk);
     three_body.register_step(walk);
-    nearest_neighbour.register_step(walk);
 
     flatperm.indices[0] = walk.size();
-    flatperm.indices[1] = nearest_neighbour.get();
-    flatperm.indices[2] = three_body.get();
+    flatperm.indices[1] = three_body.get_N2();
+    flatperm.indices[2] = three_body.get_N3();
 
     auto const n = walk.size();
 
@@ -197,14 +194,13 @@ struct instance
 
   void unregister_step()
   {
-    nearest_neighbour.unregister_step(walk);
     three_body.unregister_step(walk);
     radius.unregister_step(walk);
     walk.unregister_step();
 
     flatperm.indices[0] = walk.size();
-    flatperm.indices[1] = nearest_neighbour.get();
-    flatperm.indices[2] = three_body.get();
+    flatperm.indices[1] = three_body.get_N2();
+    flatperm.indices[2] = three_body.get_N3();
   }
 
   void run(unsigned int S) {

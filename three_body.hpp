@@ -10,9 +10,14 @@
 namespace features {
   template<typename Lattice>
   class three_body {
+  public: // DEBUG
     using point = typename Lattice::point;
 
-    std::unordered_map<point, int, typename Lattice::hash> _faces;
+    struct __data {
+      int contacts;
+      std::vector<int> visits;
+    };
+    std::unordered_map<point, __data, typename Lattice::hash> _faces;
 
     static std::pair<point, point>
     faces_from_step(point x, point y)
@@ -31,6 +36,29 @@ namespace features {
       }
     }
 
+    void do_face_in(__data& data, int n) {
+      if (data.contacts == 0 or (data.visits.back() < n - 1))
+        data.contacts ++;
+
+      data.visits.push_back(n);
+    }
+
+    void do_face_out(__data& data, int n) {
+      data.visits.pop_back();
+
+      // check if we are the last visit
+      if (data.visits.empty() or data.visits.back() < n - 1) {
+        data.contacts --;
+      }
+
+      assert(data.contacts >= 0);
+
+      if (n == 1) {
+        assert(data.contacts == 0);
+        assert(data.visits.empty());
+      }
+    }
+
   public:
     template<typename Walk>
     void register_step(Walk const& walk)
@@ -40,9 +68,11 @@ namespace features {
       point x = *i++;              // second last point
 
       // points a and b identify the faces adjacent to the step
-      auto adjacent_faces = faces_from_step(x, y);
-      _faces[adjacent_faces.first] ++;
-      _faces[adjacent_faces.second] ++;
+      const auto adjacent_faces = faces_from_step(x, y);
+      const auto n = walk.size();
+
+      do_face_in(_faces[adjacent_faces.first], n);
+      do_face_in(_faces[adjacent_faces.second], n);
     }
 
     template<typename Walk>
@@ -52,17 +82,32 @@ namespace features {
       point y = *i++;             // last point
       point x = *i++;             // second last point
 
-      auto adjacent_faces = faces_from_step(x, y);
-      _faces[adjacent_faces.first] --;
-      _faces[adjacent_faces.second] --;
+      const auto adjacent_faces = faces_from_step(x, y);
+      const auto n = walk.size();
+
+      do_face_out(_faces[adjacent_faces.first], n);
+      do_face_out(_faces[adjacent_faces.second], n);
+
+      if (walk.size() == 1) {
+        assert(get_N2() == 0);
+        assert(get_N3() == 0);
+      }
     }
 
-    int get() const {
-      // count the number of faces we have seen, each with multiplity one
+    int get_N2() const {
       int c = 0;
-      for (auto const& el : _faces) {
-        if (el.second > 0)
-          c ++;
+      for (auto const& data : _faces) {
+        if (data.second.contacts == 2)
+          ++c;
+      }
+      return c;
+    }
+
+    int get_N3() const {
+      int c = 0;
+      for (auto const& data : _faces) {
+        if (data.second.contacts == 3)
+          ++c;
       }
       return c;
     }
