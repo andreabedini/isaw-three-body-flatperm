@@ -10,13 +10,14 @@
 namespace features {
   template<typename Lattice>
   class three_body {
-  public: // DEBUG
-    using point = typename Lattice::point;
+    std::array<int, Lattice::coordination> k;
 
     struct __data {
       int contacts;
       std::vector<int> visits;
     };
+
+    using point = typename Lattice::point;
     std::unordered_map<point, __data, typename Lattice::hash> _faces;
 
     static std::pair<point, point>
@@ -37,8 +38,11 @@ namespace features {
     }
 
     void do_face_in(__data& data, int n) {
-      if (data.contacts == 0 or (data.visits.back() < n - 1))
+      if (data.contacts == 0 or (data.visits.back() < n - 1)) {
         data.contacts ++;
+        -- k[data.contacts-1];
+        ++ k[data.contacts];
+      }
 
       data.visits.push_back(n);
     }
@@ -48,6 +52,8 @@ namespace features {
 
       // check if we are the last visit
       if (data.visits.empty() or data.visits.back() < n - 1) {
+        -- k[data.contacts];
+        ++ k[data.contacts-1];
         data.contacts --;
       }
 
@@ -95,21 +101,11 @@ namespace features {
     }
 
     int get_N2() const {
-      int c = 0;
-      for (auto const& data : _faces) {
-        if (data.second.contacts == 2)
-          ++c;
-      }
-      return c;
+      return k[2];
     }
 
     int get_N3() const {
-      int c = 0;
-      for (auto const& data : _faces) {
-        if (data.second.contacts == 3)
-          ++c;
-      }
-      return c;
+      return k[3];
     }
   };
 }
