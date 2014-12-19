@@ -43,7 +43,7 @@ namespace hdf5 {
 
     //////////////////////////////////////////////////////////////////////
     // static constructors
-    //////////////////////////////////////////////////////////////////////    
+    //////////////////////////////////////////////////////////////////////
 
     static datatype create(H5T_class_t class_, size_t size)
     {
@@ -66,7 +66,7 @@ namespace hdf5 {
     }
 
     template<typename T>
-    static datatype create_like(T const& t)
+    static datatype create_like(T const&)
     {
       return datatype_from<T>::value();
     }
@@ -77,7 +77,7 @@ namespace hdf5 {
       H5Tset_size(id, t.size());
       return datatype(std::move(id));
     }
- 
+
     //
     //
     //
