@@ -6,6 +6,7 @@
 #define THREE_BODY_HPP
 
 #include <unordered_map>
+#include <boost/container/static_vector.hpp>
 
 namespace features {
   template<typename Lattice>
@@ -14,7 +15,7 @@ namespace features {
 
     struct __data {
       int contacts;
-      std::vector<int> visits;
+      boost::container::static_vector<int, 6> visits;
     };
 
     using point = typename Lattice::point;
