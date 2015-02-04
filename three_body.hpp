@@ -103,10 +103,12 @@ namespace features {
     }
 
     int get_N2() const {
+      assert(k[2] >= 0);
       return k[2];
     }
 
     int get_N3() const {
+      assert(k[3] >= 0);
       return k[3];
     }
   };
