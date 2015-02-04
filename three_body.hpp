@@ -68,6 +68,10 @@ namespace features {
     }
 
   public:
+    three_body() {
+      k.fill(0);
+    }
+
     template<typename Walk>
     void register_step(Walk const& walk)
     {
