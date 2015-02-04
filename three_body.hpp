@@ -5,6 +5,7 @@
 #ifndef THREE_BODY_HPP
 #define THREE_BODY_HPP
 
+#include <array>
 #include <unordered_map>
 #include <boost/container/static_vector.hpp>
 
