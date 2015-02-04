@@ -12,7 +12,7 @@
 namespace features {
   template<typename Lattice>
   class three_body {
-    std::array<int, Lattice::coordination> k;
+    std::array<int, 4> k;
 
     struct __data {
       int contacts;
